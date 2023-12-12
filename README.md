@@ -5,10 +5,13 @@
    - Install Visual Studio Code
    - Install MySQL version 8 (latest)
 3. Running code
-   a. Database settings
+
+    a. Database settings
    - Create database in MySQL
    - Create table in database
    - Insert data into database
+   
+   b. Running code
    - Open VS Code
    - Open folder of project
    - Open a terminal in VS Code (or cmd but prefer to one in VS Code)

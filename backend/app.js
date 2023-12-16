@@ -378,25 +378,22 @@ app.get('/checkIfHistory', (req, res) => {
 
 //Adds to Appointment Table
 app.get('/addToPatientSeeAppt', (req, res) => {
-  let params = req.query;
-  let email = req.session.email;
-  let appt_id = params.id;
-  let symptoms = params.symptoms;
-  let sql_try = `SELECT p_id FROM Patient WHERE p_email = "${email}"`;
-  console.log(sql_try);
-  con.query(sql_try, function (error, result, fields) {
+  let pa = req.query;
+  let email = pa.email;
+  let id = pa.id;
+  let symptoms = pa.symptoms;
+  let sql = `SELECT p_id FROM Patient WHERE p_email = "${email}"`;
+  con.query(sql, function (error, results, fields) {
     if (error) throw error;
-    else{
-      let sql_try = `INSERT INTO PatientBookAppointment (p_id, a_id, symptoms) 
-                     VALUES (${result[0].p_id}, ${appt_id}, "${symptoms}")`;
-      console.log(sql_try);
-      con.query(sql_try, function (error) {
+    else {
+      let p_id2 = results[0].p_id;
+      let sql_try1 = `INSERT INTO PatientBookAppointment (p_id, a_id, symptoms)
+                      VALUES (${p_id2}, ${id}, "${symptoms}")`;
+      console.log(sql_try1);
+      con.query(sql_try1, function (error, result, fields) {
         if (error) throw error;
-      })
-      return res.json({
-        data: result
-      })
-    }
+      });
+    };   
   });
 });
 
@@ -407,24 +404,38 @@ app.get('/schedule', (req, res) => {
   let date = params.date;
   let id = params.id;
   let endtime = params.endTime;
-  let doctor = params.doc;
   let ndate = new Date(date).toLocaleDateString().substring(0, 10)
   let sql_date = `STR_TO_DATE('${ndate}', '%m/%d/%Y')`;
   //sql to turn string to sql time obj
   let sql_start = `CONVERT('${time}', TIME)`;
   //sql to turn string to sql time obj
   let sql_end = `CONVERT('${endtime}', TIME)`;
+  let doctor = params.doc;
   let sql_try = `INSERT INTO Appointment (a_id, a_date, starttime, endtime, status) 
                  VALUES (${id}, ${sql_date}, ${sql_start}, ${sql_end}, "NotDone")`;
   console.log(sql_try);
-  con.query(sql_try, function (error, results, fields) {
+  con.query(sql_try, function (error, result, fields) {
     if (error) throw error;
     else {
-        return res.json({
-        data: results
-          })
+      return res.json({
+        data: result
+      })
         }
       });
+  let sql_doctor = `SELECT doc_id as id FROM Doctor d WHERE doc_email = "${doctor}"`;
+  con.query(sql_doctor, function (error, results, fields) {
+    if (error) throw error;
+    else {
+      let doc_id = results[0].id;
+      let sql_try1 = `INSERT INTO DoctorViewAppointment (doc_id, a_id)
+                      VALUES (${doc_id}, ${id})`;
+      console.log(sql_try1);
+      con.query(sql_try1, function (error, results, fields) {
+        if (error) throw error;
+        else{}
+      });
+    };   
+  });
 });
 
 //Generates ID for appointment
@@ -441,23 +452,29 @@ app.get('/genApptUID', (req, res) => {
 
 //To show appointments to doctor
 app.get('/doctorViewAppt', (req, res) => {
-  let a = req.query;
-  let email = a.email;
-  let statement = `SELECT a.a_id,a.a_date, a.starttime, a.status, p.p_name, pba.symptoms
-  FROM Appointment a JOIN PatientBookAppointment pba ON a.a_id = pba.a_id
-  JOIN Patient p ON pba.p_id = p.p_id
-  JOIN DoctorViewAppointment dva ON a.a_id = dva.a_id
-  JOIN Doctor d ON dva.doc_id = d.doc_id
-  WHERE  d.doc_email = "${email}" `;
-  console.log(statement);
-  con.query(statement, function (error, results, fields) {
-    if (error) throw error;
-    else {
-      return res.json({
-        data: results
-      })
-    };
-  });
+  let email = req.query.email;
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required.' });
+  } else {
+    let statement = `SELECT a.a_id, a.a_date, a.starttime, a.status, p.p_name, pba.symptoms
+                      FROM Patient p
+                      JOIN PatientBookAppointment pba ON pba.p_id = p.p_id
+                      JOIN Appointment a ON pba.a_id = a.a_id
+                      WHERE
+                        a.a_id IN (SELECT dva.a_id FROM DoctorViewAppointment dva
+                        WHERE dva.doc_id IN (
+                          SELECT d.doc_id FROM Doctor d WHERE d.doc_email = "${email}"))`;
+      console.log(statement);
+      con.query(statement, function (error, results, fields) {
+        if (error) throw error;
+        else {
+          return res.json({
+            data: results
+          })
+        };
+      });
+  }
+  
 });
 
 // //To show diagnoses to patient

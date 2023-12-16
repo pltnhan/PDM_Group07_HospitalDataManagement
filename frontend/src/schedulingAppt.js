@@ -186,6 +186,7 @@ const SymptomsTextArea = () => {
   const onChange = event => {
     setValue(event.target.value);
     theSymptoms = event.target.value;
+    console.log(theSymptoms);
   };
 
   return (
@@ -236,8 +237,7 @@ function DoctorsDropdown() {
 }
 
 export class SchedulingAppt extends Component {
-  constuctor() {
-  }
+
   render() {
     return (
       <Grommet theme={theme} full>
@@ -246,7 +246,7 @@ export class SchedulingAppt extends Component {
         </AppBar>
         <Box align="center" pad="small" gap="small">
           <Form
-            onSubmit={({ value }) => {
+            onSubmit={() => {
               //probably fetch uid here, add one
               fetch("http://localhost:3001/userInSession")
                 .then(res => res.json())
@@ -261,15 +261,16 @@ export class SchedulingAppt extends Component {
                       var uid_json = JSON.parse(string_json);
                       let gen_uid = uid_json.id;
                       console.log(gen_uid);
+                      console.log(email_in_use);
                       fetch("http://localhost:3001/schedule?time=" + theTime + "&endTime=" + endTime +
                         "&date=" + theDate + "&symptoms=" + theSymptoms + 
                         "&id=" + gen_uid + "&doc=" + theDoc).then((x)=>{
-                        fetch("http://localhost:3001/addToPatientSeeAppt?email=" + email_in_use + "&id=" + gen_uid).then((x)=>{
-                            window.alert("Appointment successfully scheduled!")
-                          })
-                      })
+                          fetch("http://localhost:3001/addToPatientSeeAppt?email=" +email_in_use + "&id=" +gen_uid + "&symptoms=" + theSymptoms)
+                        }).then((x)=>{
+                            window.alert("Appointment successfully scheduled!");
+                          });
+                      });
                     });
-                });
               }}
           >
             <Box align="center" gap="small">

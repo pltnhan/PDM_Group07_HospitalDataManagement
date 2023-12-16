@@ -35,9 +35,6 @@ const AppBar = (props) => (
     {...props} />
 );
 export class CreateAccount extends Component {
-  constuctor() {
-  }
-
   render() {
 
     return (

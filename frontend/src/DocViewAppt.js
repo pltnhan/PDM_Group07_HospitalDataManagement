@@ -26,11 +26,20 @@ export class DocViewAppt extends Component {
     componentDidMount() {
         this.getNames();
     }
-
     getNames() {
-        fetch('http://localhost:3001/doctorViewAppt')
-        .then(res => res.json())
-        .then(res => this.setState({ apptlist: res.data }));
+        fetch('http://localhost:3001/userInSession') 
+            .then(res => res.json())
+            .then(res => {
+                let string_json = JSON.stringify(res);
+                let email_json = JSON.parse(string_json);
+                let email_in_use = email_json.email;
+                console.log(email_in_use);
+                fetch('http://localhost:3001/doctorViewAppt?email=' + email_in_use)
+                    .then(res => res.json())
+                    .then(res => {
+                        this.setState({ apptlist: res.data });
+                    });
+            });
     }
 
     render() {

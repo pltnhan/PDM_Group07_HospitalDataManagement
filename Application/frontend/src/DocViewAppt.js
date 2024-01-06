@@ -20,18 +20,20 @@ const theme = {
     },
   };
 
-export class DocViewAppt extends Component {
+  export class DocViewAppt extends Component {
     state = { apptlist: [] }
 
     componentDidMount() {
-        this.getNames();
+        this.getNames("");
     }
-    getNames() {
-        fetch('http://localhost:3001/userInSession') 
+    getNames(value) {
+        let docName = value;
+        console.log(docName);
+        fetch("http://localhost:3001/userInSession")
             .then(res => res.json())
             .then(res => {
-                let string_json = JSON.stringify(res);
-                let email_json = JSON.parse(string_json);
+                var string_json = JSON.stringify(res);
+                var email_json = JSON.parse(string_json);
                 let email_in_use = email_json.email;
                 console.log(email_in_use);
                 fetch('http://localhost:3001/doctorViewAppt?email=' + email_in_use)
@@ -55,7 +57,7 @@ export class DocViewAppt extends Component {
                 align='center'
                 flex={false}
             >
-                <a style={{ color: 'inherit', textDecoration: 'inherit'}} href="/"><Heading level='3' margin='none'>HMS</Heading></a>
+                <a style={{ color: 'inherit', textDecoration: 'inherit'}} href="/"><Heading level='4' margin='none'>GROUP 07 - Hospital Data Management</Heading></a>
             </Box>
         );
 
@@ -65,8 +67,8 @@ export class DocViewAppt extends Component {
                     <table className="table table-hover">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Name</th>
+                                <th>Appointment ID</th>
+                                <th>Patient</th>
                                 <th>Date</th>
                                 <th>Start Time</th>
                                 <th>Symptoms</th>
@@ -75,10 +77,9 @@ export class DocViewAppt extends Component {
                         </thead>
                         <tbody>
                             {apptlist.map(appt =>
-                                <tr key={appt.name}>
-                                    <td>{appt.a_id}</td>
-                                    <td>{appt.p_name}</td>
-                                    <td>{new Date(appt.a_date).toLocaleDateString().substring(0,10)} </td>
+                                <tr key={appt.aid}>
+                                    <td>{appt.name}</td>
+                                    <td>{new Date(appt.date).toLocaleDateString().substring(0,10)} </td>
                                     <td>{appt.starttime}</td>
                                     <td>{appt.symptoms}</td>
                                     <td>{appt.status}</td>
@@ -86,7 +87,7 @@ export class DocViewAppt extends Component {
                                         {appt.status === "NotDone"?
                                             <Button label="Cancel"
                                             onClick = {() => {
-                                                fetch('http://localhost:3001/deleteAppt?uid='+ appt.a_id)
+                                                fetch('http://localhost:3001/deleteAppt?uid='+ appt.aid)
                                                 window.location.reload();
                                             }}
                                             ></Button>

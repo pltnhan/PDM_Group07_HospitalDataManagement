@@ -40,7 +40,7 @@ export class ViewMedHist extends Component {
                 align='center'
                 flex={false}
             >
-               <a style={{ color: 'inherit', textDecoration: 'inherit'}} href="/"><Heading level='3' margin='none'>HMS</Heading></a>
+               <a style={{ color: 'inherit', textDecoration: 'inherit'}} href="/"><Heading level='4' margin='none'>GROUP 07 - Hospital Data Management</Heading></a>
 
             </Box>
         );

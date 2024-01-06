@@ -64,10 +64,6 @@ app.get('/makeAccount', (req, res) => {
   let password = query.password;
   let province = query.province;
   let gender = query.gender;
-  let symptom = query.symptom;
-  if(!symptom===undefined){
-    symptom="none"
-  }
   let sql_statement1 = `INSERT INTO Account (username, passwo, usertype) 
                        VALUES ` + `("${email}", "${password}", "Patient")`;
   console.log(sql_statement1);
@@ -87,13 +83,6 @@ app.get('/makeAccount', (req, res) => {
             data: results
       })
     };
-  });
-  let sql_statement2 = `INSERT INTO MedicalRecord (mr_date, symptom) 
-                       VALUES ` + `(curdate(), "${symptom}")`;
-  console.log(sql_statement2);
-  con.query(sql_statement2, function (error, results, fields) {
-    if (error) throw error;
-    else {};
   });
 });
 
@@ -191,8 +180,8 @@ app.get('/checkDoclogin', (req, res) => {
       } else {
         var string = JSON.stringify(results);
         var json = JSON.parse(string);
-        email_in_use = json[0].email;
-        password_in_use = json[0].password;
+        email_in_use = email;
+        password_in_use = password;
         who="doc";
         console.log(email_in_use);
         console.log(password_in_use);
@@ -215,65 +204,6 @@ app.get('/endSession', (req, res) => {
   email_in_use = "";
   password_in_use = "";
 });
-
-//Appointment Related
-
-// //Checks If a similar appointment exists to avoid a clash
-// app.get('/checkIfApptExists', (req, res) => {
-//   let params = req.query;
-//   let email = params.email;
-//   let doc_email = params.docEmail;
-//   let startTime = params.startTime;
-//   let date = params.date;
-//   let ndate = new Date(date).toLocaleDateString().substring(0, 10)
-//   let sql_date = `STR_TO_DATE('${ndate}', '%d/%m/%Y')`;
-//   //sql to turn string to sql time obj
-//   let sql_start = `CONVERT('${startTime}', TIME)`;
-//   let statement = `SELECT * FROM PatientsAttendAppointments, Appointment  
-//   WHERE patient = "${email}" AND
-//   appt = id AND
-//   date = ${sql_date} AND
-//   starttime = ${sql_start}`
-//   console.log(statement)
-//   con.query(statement, function (error, results, fields) {
-//     if (error) throw error;
-//     else {
-//       cond1 = results;
-//       statement=`SELECT * FROM Diagnose d INNER JOIN Appointment a 
-//       ON d.appt=a.id WHERE doctor="${doc_email}" AND date=${sql_date} AND status="NotDone" 
-//       AND ${sql_start} >= starttime AND ${sql_start} < endtime`
-//       console.log(statement)
-//       con.query(statement, function (error, results, fields) {
-//         if (error) throw error;
-//         else {
-//           cond2 = results;
-//           statement = `SELECT doctor, starttime, endtime, breaktime, day FROM DocsHaveSchedules 
-//           INNER JOIN Schedule ON DocsHaveSchedules.sched=Schedule.id
-//           WHERE doctor="${doc_email}" AND 
-//           day=DAYNAME(${sql_date}) AND 
-//           (DATE_ADD(${sql_start},INTERVAL +1 HOUR) <= breaktime OR ${sql_start} >= DATE_ADD(breaktime,INTERVAL +1 HOUR));`
-//           //not in doctor schedule
-//           console.log(statement)
-//           con.query(statement, function (error, results, fields) {
-//             if (error) throw error;
-//             else {
-//               if(results.length){
-//                 results = []
-//               }
-//               else{
-//                 results = [1]
-//               }
-//               return res.json({
-//                 data: cond1.concat(cond2,results)
-//               })
-//             };
-//           });
-//         };
-//       });
-//     };
-//   });
-//   //doctor has appointment at the same time - Your start time has to be greater than all prev end times
-// });
 
 //Returns Date/Time of Appointment
 app.get('/getDateTimeOfAppt', (req, res) => {
@@ -316,11 +246,9 @@ app.get('/docInfo', (req, res) => {
 app.get('/OneHistory', (req, res) => {
   let params = req.query;
   let email = params.patientEmail;
-  let statement = `SELECT p.p_biogender,p.p_name,p.p_email,p.p_province, p.p_dob, p.p_phone, m.symptom, m.disease, m.treatment
-                    FROM Patient p
-                    JOIN PatientViewMedicalRecord v ON p.p_id = v.p_id
-                    JOIN MedicalRecord m ON v.mr_id = m.mr_id
-                    WHERE p.p_email = ` + email;
+  let statement = `SELECT p_biogender,p_name,p_email,p_province, p_phone
+                    FROM Patient
+                    WHERE p_email = ` + email;
   console.log(statement);
   con.query(statement, function (error, results, fields) {
     if (error) throw error;
@@ -411,6 +339,7 @@ app.get('/schedule', (req, res) => {
   //sql to turn string to sql time obj
   let sql_end = `CONVERT('${endtime}', TIME)`;
   let doctor = params.doc;
+  let symptom = params.symptoms;
   let sql_try = `INSERT INTO Appointment (a_id, a_date, starttime, endtime, status) 
                  VALUES (${id}, ${sql_date}, ${sql_start}, ${sql_end}, "NotDone")`;
   console.log(sql_try);
@@ -432,10 +361,17 @@ app.get('/schedule', (req, res) => {
       console.log(sql_try1);
       con.query(sql_try1, function (error, results, fields) {
         if (error) throw error;
-        else{}
+        else{
+          let sql_try1 = `INSERT INTO MedicalRecord (mr_date, symptom) 
+                                VALUES (${sql_date}, "${symptom}")`;
+          console.log(sql_try1);
+          con.query(sql_try1, function (error, results, fields) {
+            if (error) throw error;});
+        }
       });
     };   
   });
+
 });
 
 //Generates ID for appointment
@@ -452,29 +388,33 @@ app.get('/genApptUID', (req, res) => {
 
 //To show appointments to doctor
 app.get('/doctorViewAppt', (req, res) => {
-  let email = req.query.email;
-  if (!email) {
-    return res.status(400).json({ error: 'Email is required.' });
-  } else {
-    let statement = `SELECT a.a_id, a.a_date, a.starttime, a.status, p.p_name, pba.symptoms
-                      FROM Patient p
-                      JOIN PatientBookAppointment pba ON pba.p_id = p.p_id
-                      JOIN Appointment a ON pba.a_id = a.a_id
-                      WHERE
-                        a.a_id IN (SELECT dva.a_id FROM DoctorViewAppointment dva
-                        WHERE dva.doc_id IN (
-                          SELECT d.doc_id FROM Doctor d WHERE d.doc_email = "${email}"))`;
-      console.log(statement);
-      con.query(statement, function (error, results, fields) {
-        if (error) throw error;
-        else {
-          return res.json({
-            data: results
-          })
-        };
-      });
+  let params = req.query;
+  let email = params.email;
+  let sql_doctor = `SELECT doc_id as did FROM Doctor WHERE doc_email = "${email}"`;
+  console.log(sql_doctor);
+  con.query(sql_doctor, function (error, results, fields) {
+  if (error) throw error;
+  else {
+    let doc_id = results[0].did;
+    console.log(doc_id);
+    let statement = `SELECT a.a_id as aid, a.a_date as date, a.starttime as starttime, a.status as status, p.p_name as name, pba.symptoms as symptoms
+                    FROM Doctor d
+                    JOIN DoctorViewAppointment dva ON d.doc_id=dva.doc_id
+                    JOIN Appointment a ON dva.a_id = a.a_id
+                    JOIN PatientBookAppointment pba ON a.a_id = pba.a_id
+                    JOIN Patient p ON pba.p_id = p.p_id
+                    WHERE d.doc_id = ${doc_id}`;
+    console.log(statement);
+    con.query(statement, function (error, result) {
+      if (error) throw error;
+      else {
+        return res.json({
+          data: result
+        })
+      }
+    });
   }
-  
+  });
 });
 
 // //To show diagnoses to patient
@@ -492,23 +432,27 @@ app.get('/doctorViewAppt', (req, res) => {
 //   });
 // });
 
-// //To Show all diagnosed appointments till now
-// app.get('/allDiagnoses', (req, res) => {
-//   let params = req.query;
-//   let email = params.patientEmail;
-//   let statement =`SELECT date,doctor,concerns,symptoms,diagnosis,prescription FROM 
-//   Appointment A INNER JOIN (SELECT * from PatientsAttendAppointments NATURAL JOIN Diagnose 
-//   WHERE patient=${email}) AS B ON A.id = B.appt;`
-//   console.log(statement);
-//   con.query(statement, function (error, results, fields) {
-//     if (error) throw error;
-//     else {
-//       return res.json({
-//         data: results
-//       })
-//     };
-//   });
-// });
+//To Show all diagnosed appointments till now
+app.get('/allDiagnoses', (req, res) => {
+  let params = req.query;
+  let email = params.patientEmail;
+  let statement =`SELECT m.mr_date as date, m.symptom as symptom, m.disease as disease, m.treatment as treatment, d.doc_email as doctor
+                  FROM MedicalRecord m
+                  JOIN PatientViewMedicalRecord pvm ON m.mr_id = pvm.mr_id
+                  JOIN Patient p ON pvm.p_id = p.p_id
+                  JOIN DoctorViewMedicalRecord dvm ON m.mr_id = dvm.mr_id
+                  JOIN Doctor d ON dvm.doc_id = d.doc_id
+                  WHERE p.p_email = ` +email;
+  console.log(statement);
+  con.query(statement, function (error, results, fields) {
+    if (error) throw error;
+    else {
+      return res.json({
+        data: results
+      })
+    };
+  });
+});
 
 // //To delete appointment
 // app.get('/deleteAppt', (req, res) => {

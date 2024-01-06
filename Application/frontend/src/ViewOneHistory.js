@@ -60,7 +60,7 @@ export class ViewOneHistory extends Component {
                 align='center'
                 flex={false}
             >
-                <a style={{ color: 'inherit', textDecoration: 'inherit'}} href="/"><Heading level='3' margin='none'>HMS</Heading></a>
+                <a style={{ color: 'inherit', textDecoration: 'inherit'}} href="/"><Heading level='4' margin='none'>GROUP 07 - Hospital Data Management</Heading></a>
             </Box>
         );
         const Body = () => (
@@ -71,36 +71,33 @@ export class ViewOneHistory extends Component {
                             <TableBody>
                                 <TableRow>
                                     <TableCell scope="row">
-                                        <strong>Name</strong>
+                                        <strong>Name:</strong>
                                     </TableCell>
-                                    <TableCell>{patient.name}</TableCell>
+                                    <TableCell>{patient.p_name}</TableCell>
                                     <TableCell></TableCell>
-                                    <TableCell><strong>Email</strong></TableCell>
-                                    <TableCell>{patient.email}</TableCell>
+                                    <TableCell><strong>Email:</strong></TableCell>
+                                    <TableCell>{patient.p_email}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell scope="row">
-                                        <strong>Gender</strong>
+                                        <strong>Gender:</strong>
                                     </TableCell>
                                     <TableCell>
-                                        {patient.gender}
+                                        {patient.p_biogender}
                                     </TableCell>
                                     <TableCell />
                                     <TableCell>
-                                        <strong>Address</strong>
+                                        <strong>Address:</strong>
                                     </TableCell>
-                                    <TableCell>{patient.address}</TableCell>
+                                    <TableCell>{patient.p_province}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell scope="row">
+                                        <strong>Phone Number:</strong>
                                     </TableCell>
-                                </TableRow>
-                                <TableRow>
                                     <TableCell>
-                                        <strong>Symptoms</strong>
+                                        {patient.p_phone}
                                     </TableCell>
-                                    <TableCell>{patient.symptoms}
-                                        </TableCell>
                                 </TableRow>
                             </TableBody>
                         </Table>
@@ -118,23 +115,29 @@ export class ViewOneHistory extends Component {
                             <TableBody>
                                 <TableRow>
                                     <TableCell scope="row">
-                                        <strong>Date</strong>
+                                        <strong>Date:</strong>
                                     </TableCell>
                                     <TableCell>{patient.date.split('T')[0]}</TableCell>
                                     <TableCell></TableCell>
-                                    <TableCell><strong>Doctor</strong></TableCell>
+                                    <TableCell><strong>Doctor:</strong></TableCell>
                                     <TableCell>{patient.doctor}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell scope="row">
-                                        <strong>Disease</strong>
+                                        <strong>Symptoms:</strong>
+                                    </TableCell>
+                                    <TableCell>{patient.symptom}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell scope="row">
+                                        <strong>Diagnosed Disease:</strong>
                                     </TableCell>
                                     <TableCell>
                                         {patient.disease}
                                     </TableCell>
                                     <TableCell />
                                     <TableCell>
-                                        <strong>Treatment</strong>
+                                        <strong>Treatment:</strong>
                                     </TableCell>
                                     <TableCell>{patient.treatment}</TableCell>
                                 </TableRow>

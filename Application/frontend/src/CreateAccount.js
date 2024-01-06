@@ -40,7 +40,7 @@ export class CreateAccount extends Component {
     return (
       <Grommet theme={theme} full>
         <AppBar>
-          <a style={{ color: 'inherit', textDecoration: 'inherit'}} href="/"><Heading level='3' margin='none'>HMS</Heading></a>
+          <a style={{ color: 'inherit', textDecoration: 'inherit'}} href="/"><Heading level='4' margin='none'>GROUP 07 - Hospital Data Management</Heading></a>
         </AppBar>
         <Box fill align="center" justify="top">
           <Box width="medium">
@@ -62,7 +62,7 @@ export class CreateAccount extends Component {
                     } else {
                       fetch("http://localhost:3001/makeAccount?name=" + value.firstName + "&lastname=" + value.lastName + "&email=" + value.email
                         + "&dob=" +value.dob + "&phone=" +value.phone + "&password=" + value.password 
-                        + "&province=" + value.province + "&gender=" + value.gender + "&symptom=" + value.symptom);
+                        + "&province=" + value.province + "&gender=" + value.gender);
                       window.location = "/Home";
                     }
                   });
@@ -100,11 +100,6 @@ export class CreateAccount extends Component {
                 placeholder="Province"
                 required
               />
-              <FormField
-                label="Symptom"
-                name="symptom"
-                placeholder="Symptom"
-               />
               <FormField
                 label="Email"
                 name="email"

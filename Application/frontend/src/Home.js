@@ -94,7 +94,7 @@ export class Home extends Component {
         flex={false}
         style={{borderBottom:"1px solid grey"}}
       >
-        <a style={{ color: 'inherit', textDecoration: 'inherit'}} href="/"><Heading level='3' margin='none'>HMS</Heading></a>
+        <a style={{ color: 'inherit', textDecoration: 'inherit'}} href="/"><Heading level='4' margin='none'>GROUP 07 - Hospital Data Management</Heading></a>
       </Box>
     );
 

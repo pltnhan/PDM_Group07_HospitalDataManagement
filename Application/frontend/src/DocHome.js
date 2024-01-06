@@ -48,7 +48,7 @@ const SidebarButtons = () => {
                             active={label === active}
                             onClick={() => {
                                 if (label === "Appointments") {
-                                    window.location = "/ApptList"
+                                    window.location = "/DocViewAppt"
                                 }
                                 else if (label === "Sign Out") {
                                     fetch("http://localhost:3001/endSession");
@@ -85,7 +85,7 @@ export class DocHome extends Component {
                 flex={false}
                 style={{borderBottom:"1px solid grey"}}
             >
-                <a style={{ color: 'inherit', textDecoration: 'inherit'}} href="/"><Heading level='3' margin='none'>HMS</Heading></a>
+                <a style={{ color: 'inherit', textDecoration: 'inherit'}} href="/"><Heading level='4' margin='none'>GROUP 07 - Hospital Data Management</Heading></a>
 
             </Box>
         );

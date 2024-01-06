@@ -68,7 +68,7 @@ export default function App() {
           <Route path="/PatientsViewAppt">
             <PatientsViewAppt />
           </Route>
-          <Route path="/ApptList">
+          <Route path="/DocViewAppt">
             <DocViewAppt />
           </Route>
           <Route path="/">
